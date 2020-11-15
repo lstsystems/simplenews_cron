@@ -1,0 +1,68 @@
+<?php
+
+
+/**
+ * Helper for hook_cron() to send a new edition.
+ *
+ * @param $node
+ *
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @throws \Drupal\Core\Entity\EntityStorageException
+ */
+function _send_new_edition($node) {
+
+  $node_storage = \Drupal::EntityTypeManager()->getStorage('node')->load($node);
+  \Drupal::service('simplenews.spool_storage')->addIssue($node_storage);
+  $node_storage->save();
+}
+
+/**
+ * Helper for hook_cron to set news edition status on database
+ *
+ * @param $nid
+ * @param $status
+ */
+function _set_newsletter_status($nid, $status) {
+  $query = \Drupal::database()->update('{node__simplenews_issue}');
+  $query->fields([
+    'simplenews_issue_status' => $status,
+  ]);
+  $query->condition('entity_id', $nid);
+  $query->execute();
+}
+
+
+function simplenews_cron_cron() {
+
+  // Check to run only on saturdays
+  if(!date('D') == 'Sat') {
+    return;
+  }
+
+  // Store all the node id of entity type simplenews_issue into an object array
+  $results = \Drupal::entityTypeManager()
+    ->getListBuilder('node')
+    ->getStorage()
+    ->loadByProperties([
+      'type' => 'simplenews_issue',
+      'status' => 1,
+    ]);
+
+
+  // Loop through each stored node id object
+  foreach ($results as $record) {
+
+    // convert record from class object to string by grabbing the id in the object
+    $record = $record->id();
+
+    // Set the status of the node to 1 in preparation for sending
+    _set_newsletter_status($record, '1');
+    //send news letter for each node
+    _send_new_edition($record);
+    //set status back to 0 for future run
+    _set_newsletter_status($record, '0');
+
+  }
+}
+
