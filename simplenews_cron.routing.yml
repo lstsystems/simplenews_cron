@@ -1,0 +1,7 @@
+simplenews_cron.settings_form:
+  path: '/admin/config/services/simplenews_cron'
+  defaults:
+    _form: '\Drupal\simplenews_cron\Form\settingsForm'
+    _title: 'Simplenews Cron Settings'
+  requirements:
+    _access: 'TRUE'

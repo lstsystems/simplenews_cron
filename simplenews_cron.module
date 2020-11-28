@@ -32,14 +32,14 @@ function _set_newsletter_status($nid, $status) {
   $query->execute();
 }
 
-
-function simplenews_cron_cron() {
-
-  // Check to run only on saturdays
-  if(!date('D') == 'Sat') {
-    return;
-  }
-
+/**
+ * Sent newsletter function
+ *
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @throws \Drupal\Core\Entity\EntityStorageException
+ */
+function _send_newsletters() {
   // Store all the node id of entity type simplenews_issue into an object array
   $results = \Drupal::entityTypeManager()
     ->getListBuilder('node')
@@ -64,5 +64,45 @@ function simplenews_cron_cron() {
     _set_newsletter_status($record, '0');
 
   }
+}
+
+/**
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @throws \Drupal\Core\Entity\EntityStorageException
+ */
+function _cron_helper() {
+  $settings = \Drupal::config('simplenews_cron.settings')->get('send_date');
+
+  /**
+   * Check last run and if less than a day return
+   */
+  //load cron job entity
+  $ultimate_cron_entity = \Drupal::entityTypeManager()
+    ->getStorage('ultimate_cron_job')
+    ->load('simplenews_cron_cron');
+  $log_entry = $ultimate_cron_entity->loadLatestLogEntry();
+
+
+  //check time diference
+  if(!strtotime($log_entry->start_time) < strtotime('-1 days') ) {
+    return;
+  } else if(!date('D') == $settings) {
+    return;
+  } else {
+    _send_newsletters();
+  }
+
+
+}
+
+
+/**
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @throws \Drupal\Core\Entity\EntityStorageException
+ */
+function simplenews_cron_cron() {
+  _cron_helper();
 }
 

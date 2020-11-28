@@ -6,7 +6,7 @@ core_version_requirement: ^8 || ^9
 package: Mail
 dependencies:
   - simplenews:simplenews
-  - ultimate_cron:ultimate_cron
+#  - ultimate_cron:ultimate_cron
 
 
 # Information added by Drupal.org packaging script on 2016-09-22

@@ -1,0 +1,6 @@
+simplenews_cron.description:
+  title: Simplenews Cron
+  description: 'Configure simplenews cron module'
+  parent: system.admin_config_services
+  route_name: simplenews_cron.settings_form
+  expanded: TRUE
