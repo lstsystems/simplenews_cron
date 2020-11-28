@@ -40,6 +40,10 @@ function _set_newsletter_status($nid, $status) {
  * @throws \Drupal\Core\Entity\EntityStorageException
  */
 function _send_newsletters() {
+
+ //Set run time stamp on config file
+  \Drupal::getContainer()->get('config.factory')->getEditable('simplenews_cron.settings')->set('last_run', time())->save();
+
   // Store all the node id of entity type simplenews_issue into an object array
   $results = \Drupal::entityTypeManager()
     ->getListBuilder('node')
@@ -64,6 +68,8 @@ function _send_newsletters() {
     _set_newsletter_status($record, '0');
 
   }
+
+
 }
 
 /**
@@ -72,27 +78,22 @@ function _send_newsletters() {
  * @throws \Drupal\Core\Entity\EntityStorageException
  */
 function _cron_helper() {
-  $settings = \Drupal::config('simplenews_cron.settings')->get('send_date');
+  //get configuration send date day
+  $getSettingsDay = \Drupal::config('simplenews_cron.settings')->get('send_date');
+  //get configuration last run time stamp
+  $getSettingsLastRun = \Drupal::config('simplenews_cron.settings')->get('last_run');
 
   /**
-   * Check last run and if less than a day return
+   * Check last run timestamp  and if less than a day return
+   * Check day to run and if false return
    */
-  //load cron job entity
-  $ultimate_cron_entity = \Drupal::entityTypeManager()
-    ->getStorage('ultimate_cron_job')
-    ->load('simplenews_cron_cron');
-  $log_entry = $ultimate_cron_entity->loadLatestLogEntry();
-
-
-  //check time diference
-  if(!strtotime($log_entry->start_time) < strtotime('-1 days') ) {
+  if(!strtotime($getSettingsLastRun) < strtotime('-1 days') ) {
     return;
-  } else if(!date('D') == $settings) {
+  } else if(!date('D') == $getSettingsDay) {
     return;
   } else {
     _send_newsletters();
   }
-
 
 }
 
