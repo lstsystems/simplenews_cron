@@ -77,22 +77,21 @@ function _send_newsletters() {
  * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
  * @throws \Drupal\Core\Entity\EntityStorageException
  */
-function _cron_helper() {
+function _simplenews_cron_helper() {
   //get configuration send date day
   $getSettingsDay = \Drupal::config('simplenews_cron.settings')->get('send_date');
   //get configuration last run time stamp
   $getSettingsLastRun = \Drupal::config('simplenews_cron.settings')->get('last_run');
 
   /**
-   * Check last run timestamp  and if less than a day return
-   * Check day to run and if false return
+   * check for last run and configure day to run
    */
-  if(!strtotime($getSettingsLastRun) < strtotime('-1 days') ) {
+  if($getSettingsLastRun > strtotime('-1 days') && !date('D') == $getSettingsDay) {
     return;
-  } else if(!date('D') == $getSettingsDay) {
-    return;
-  } else {
+  } else if($getSettingsLastRun < strtotime('-1 days') && date('D') == $getSettingsDay) {
     _send_newsletters();
+  } else {
+    return;
   }
 
 }
@@ -104,6 +103,6 @@ function _cron_helper() {
  * @throws \Drupal\Core\Entity\EntityStorageException
  */
 function simplenews_cron_cron() {
-  _cron_helper();
+  _simplenews_cron_helper();
 }
 
