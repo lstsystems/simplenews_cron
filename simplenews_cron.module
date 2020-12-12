@@ -58,14 +58,23 @@ function _send_newsletters() {
   foreach ($results as $record) {
 
     // convert record from class object to string by grabbing the id in the object
-    $record = $record->id();
+    $recordID = $record->id();
 
-    // Set the status of the node to 1 in preparation for sending
-    _set_newsletter_status($record, '1');
-    //send news letter for each node
-    _send_new_edition($record);
-    //set status back to 0 for future run
-    _set_newsletter_status($record, '0');
+    //check that a newsletter has been assign to the node
+    $recordField = $record->get('simplenews_issue')->getValue();
+    //warning message
+    $message = "Node ".$recordID." has not been assign a newsletter";
+    //if field is empty log message - else run code
+    if (empty($recordField)) {
+      \Drupal::logger('simplenews_cron')->error($message);
+    } else {
+      // Set the status of the node to 1 in preparation for sending
+      _set_newsletter_status($recordID, '1');
+      //send news letter for each node
+      _send_new_edition($recordID);
+      //set status back to 0 for future run
+      _set_newsletter_status($recordID, '0');
+    }
 
   }
 
