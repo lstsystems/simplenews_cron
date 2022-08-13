@@ -1,0 +1,7 @@
+services:
+  simplenews_cron.config:
+    class: Drupal\simplenews_cron\ConfigData
+    arguments: ['@config.factory']
+  simplenews_cron.cron_handler:
+    class: Drupal\simplenews_cron\NewsletterEdition
+    arguments: ['@simplenews_cron.config', '@entity_type.manager', '@simplenews.spool_storage', '@database', '@logger.factory']

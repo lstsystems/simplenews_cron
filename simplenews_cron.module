@@ -1,117 +1,14 @@
 <?php
 
+use Drupal\simplenews_cron\NewsletterEdition;
 
 /**
- * Helper for hook_cron() to send a new edition.
- *
- * @param $node
- *
- * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
- * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
- * @throws \Drupal\Core\Entity\EntityStorageException
- */
-function _send_new_edition($node) {
-
-  $node_storage = \Drupal::EntityTypeManager()->getStorage('node')->load($node);
-  \Drupal::service('simplenews.spool_storage')->addIssue($node_storage);
-  $node_storage->save();
-}
-
-/**
- * Helper for hook_cron to set news edition status on database
- *
- * @param $nid
- * @param $status
- */
-function _set_newsletter_status($nid, $status) {
-  $query = \Drupal::database()->update('{node__simplenews_issue}');
-  $query->fields([
-    'simplenews_issue_status' => $status,
-  ]);
-  $query->condition('entity_id', $nid);
-  $query->execute();
-}
-
-/**
- * Sent newsletter function
- *
- * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
- * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
- * @throws \Drupal\Core\Entity\EntityStorageException
- */
-function _send_newsletters() {
-
- //Set run time stamp on config file
-  \Drupal::getContainer()->get('config.factory')->getEditable('simplenews_cron.settings')->set('last_run', time())->save();
-
-  // Store all the node id of entity type simplenews_issue into an object array
-  $results = \Drupal::entityTypeManager()
-    ->getListBuilder('node')
-    ->getStorage()
-    ->loadByProperties([
-      'type' => 'simplenews_issue',
-      'status' => 1,
-    ]);
-
-
-  // Loop through each stored node id object
-  foreach ($results as $record) {
-
-    // convert record from class object to string by grabbing the id in the object
-    $recordID = $record->id();
-
-    //check that a newsletter has been assign to the node
-    $recordField = $record->get('simplenews_issue')->getValue();
-    //warning message
-    $message = "Node ".$recordID." has not been assign a newsletter";
-    //if field is empty log message - else run code
-    if (empty($recordField)) {
-      \Drupal::logger('simplenews_cron')->error($message);
-    } else {
-      // Set the status of the node to 1 in preparation for sending
-      _set_newsletter_status($recordID, '1');
-      //send news letter for each node
-      _send_new_edition($recordID);
-      //set status back to 0 for future run
-      _set_newsletter_status($recordID, '0');
-    }
-
-  }
-
-
-}
-
-/**
- * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
- * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
- * @throws \Drupal\Core\Entity\EntityStorageException
- */
-function _simplenews_cron_helper() {
-  //get configuration send date day
-  $getSettingsDay = \Drupal::config('simplenews_cron.settings')->get('send_date');
-  //get configuration last run time stamp
-  $getSettingsLastRun = \Drupal::config('simplenews_cron.settings')->get('last_run');
-
-  /**
-   * check for last run and configure day to run
-   */
-  if($getSettingsLastRun > strtotime('-1 days') && !date('D') == $getSettingsDay) {
-    return;
-  } else if($getSettingsLastRun < strtotime('-1 days') && date('D') == $getSettingsDay) {
-    _send_newsletters();
-  } else {
-    return;
-  }
-
-}
-
-
-/**
- * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
- * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
- * @throws \Drupal\Core\Entity\EntityStorageException
+ * Implement hook_cron
  */
 function simplenews_cron_cron() {
-  _simplenews_cron_helper();
+
+  $dd = Drupal::service('simplenews_cron.cron_handler');
+
+  $dd->cron_manager();
 }
 
