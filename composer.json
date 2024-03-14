@@ -1,8 +1,8 @@
 {
-  "name": "drupal/simplenews_cron",
+  "name": "lstsystems/simplenews_cron",
   "type": "drupal-custom-module",
   "description": "Allows a schedule to be set for sending (and resending) a Simplenews item.",
-  "keywords": ["Drupal", "simplenews_cron"],
+  "keywords": ["Drupal", "simplenews_cron", "lstsystems"],
   "license": "GPL-2.0+",
   "homepage": "https://github.com/lstsystems/simplenews_cron",
   "minimum-stability": "dev",
