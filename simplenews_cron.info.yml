@@ -1,7 +1,7 @@
 name: 'Simplenews Cron'
 type: module
 description: 'Allows a schedule to be set for sending (and resending) a Simplenews item.'
-core_version_requirement: ^8 || ^9 || ^10
+core_version_requirement: ^8 || ^9 || ^10 || ^11
 # core: 8.x
 package: Mail
 dependencies:
