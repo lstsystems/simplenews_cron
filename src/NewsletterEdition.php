@@ -103,6 +103,9 @@ class NewsletterEdition
 
     // send nodes to the simplenews storage pool
     $this->spool_storage->addIssue($node_storage);
+
+    $this->logger->get('simplenews_cron')->info('Node ' . $node . ' has been added to the send pool');
+
     /**
      * may need to be saved bellow
      * @TODO
@@ -130,6 +133,8 @@ class NewsletterEdition
     $query->condition('entity_id', $nodeId);
     // execute the update
     $query->execute();
+
+    $this->logger->get('simplenews_cron')->info('Node ' . $nodeId . ' has been Set to status ' . $status);
   }
 
 
@@ -207,8 +212,12 @@ class NewsletterEdition
    // $this->config->set_sent_time('');
    // $this->logger->get('simplenews_cron')->info($this->config->get_sent_time());  }
 
+
+
     if ($this->config->get_sent_time() < strtotime('-1 days') && date('D') === $this->config->get_send_date()) {
+      $this->logger->get('simplenews_cron')->info('Newsletter iteration started at ' . date('Y-m-d H:i:s'));
       $this->newsletter_iteration();
+      $this->logger->get('simplenews_cron')->info('Newsletter iteration ended at ' . date('Y-m-d H:i:s'));
     } else {
       return;
     }
