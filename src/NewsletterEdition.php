@@ -154,7 +154,8 @@ class NewsletterEdition
     $this->send_new_edition($nodeId);
 
     //set status back to 0 for future runs
-    $this->set_newsletter_status($nodeId, '0');
+      // Last disabled to see if this stop the double send
+    //$this->set_newsletter_status($nodeId, '0');
   }
 
   /**
