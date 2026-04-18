@@ -150,6 +150,9 @@ class NewsletterEdition
     // Set the status of the node to 1 in preparation for sending
     $this->set_newsletter_status($nodeId, '1');
 
+    // Add a second wait here to allow the node to be fully processed
+    sleep(1);
+
     //send news letter for each node
     $this->send_new_edition($nodeId);
 
