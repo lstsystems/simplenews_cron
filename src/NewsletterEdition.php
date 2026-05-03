@@ -157,7 +157,7 @@ class NewsletterEdition
     $this->send_new_edition($nodeId);
 
     //set status back to 0 for future runs
-    $this->set_newsletter_status($nodeId, '0');
+    //$this->set_newsletter_status($nodeId, '0');
   }
 
   /**
